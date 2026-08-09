@@ -1,12 +1,12 @@
 backend:
   name: github
-  repo: YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME
+  repo: h312726-alt/forever
   branch: main
 
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
-site_url: "https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPOSITORY_NAME/"
+site_url: "https://h312726-alt.github.io/forever/"
 logo_url: ""
 
 publish_mode: editorial_workflow

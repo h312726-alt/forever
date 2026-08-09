@@ -1,0 +1,34 @@
+backend:
+  name: github
+  repo: YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME
+  branch: main
+
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+site_url: "https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPOSITORY_NAME/"
+logo_url: ""
+
+publish_mode: editorial_workflow
+
+collections:
+  - name: reports
+    label: 報導資料
+    files:
+      - label: 報導清單
+        name: reports-file
+        file: "content/reports.json"
+        extension: json
+        format: json
+        editor:
+          preview: true
+        fields:
+          - name: reports
+            label: 報導清單
+            widget: list
+            fields:
+              - { name: title, label: 標題, widget: string }
+              - { name: category, label: 分類, widget: select, options: [社會, 政治, 國際, 文化, 生活] }
+              - { name: summary, label: 摘要, widget: text }
+              - { name: time, label: 時間, widget: string }
+              - { name: tone, label: 版型, widget: select, options: [normal, strong], default: normal }

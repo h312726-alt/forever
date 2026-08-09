@@ -1,0 +1,84 @@
+.editor-page {
+  overflow-x: hidden;
+}
+
+.editor-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  background: rgba(58, 112, 190, 0.96);
+  color: #fff7ef;
+}
+
+.editor-toolbar .eyebrow {
+  color: rgba(229, 241, 255, 0.96);
+}
+
+.editor-toolbar strong {
+  font-family: "Noto Sans TC", system-ui, sans-serif;
+  font-size: 0.94rem;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.editor-actions button,
+.editor-actions a {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: none;
+  color: #162235;
+  background: #f4f9ff;
+  cursor: pointer;
+}
+
+.editor-shell [contenteditable="true"] {
+  outline: 1px dashed rgba(74, 143, 232, 0.45);
+  outline-offset: 4px;
+  border-radius: 10px;
+  padding: 2px 4px;
+}
+
+.editor-shell [contenteditable="true"]:focus {
+  outline: 2px solid rgba(74, 143, 232, 0.82);
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.comments-placeholder {
+  margin-top: 10px;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(241, 247, 255, 0.82);
+  color: var(--muted);
+  border: 1px dashed var(--line);
+}
+
+body[data-theme="dark"] .editor-toolbar {
+  background: rgba(10, 20, 36, 0.96);
+}
+
+body[data-theme="dark"] .editor-actions button,
+body[data-theme="dark"] .editor-actions a,
+body[data-theme="dark"] .theme-toggle {
+  background: rgba(255, 255, 255, 0.08);
+  color: #eef5ff;
+}
+
+body[data-theme="dark"] .editor-shell [contenteditable="true"]:focus {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+body[data-theme="dark"] .comments-placeholder {
+  background: rgba(255, 255, 255, 0.06);
+}

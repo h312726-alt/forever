@@ -1,3 +1,8 @@
+// Supabase 配置
+const SUPABASE_URL = 'https://ohxfigyfndsbdrdaobjr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_thOWpBPmw188fTMFLkmD7g_HogvWmaN';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const fallbackReports = [
   { title: '', category: '', summary: '', time: '', tone: '' },
   { title: '', category: '', summary: '', time: '', tone: '' },
@@ -14,10 +19,17 @@ const year = document.getElementById('year');
 const reportsUrl = 'content/reports.json';
 const EDITOR_STORAGE_KEY = 'verdo-editor-edits';
 
-function loadEdits() {
+async function loadEdits() {
   try {
-    const raw = localStorage.getItem(EDITOR_STORAGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : {};
+    const { data, error } = await supabase.from('edits').select('*');
+    if (error) {
+      console.warn('Supabase load error:', error);
+      return {};
+    }
+    const parsed = {};
+    data.forEach((row) => {
+      parsed[row.key] = row.value;
+    });
     // sanitize some stored fields to remove accidental inline tags
     Object.keys(parsed).forEach((k) => {
       if (/^report\d+(Category|Title|MetaLabel|Time)$/.test(k)) {
@@ -25,7 +37,8 @@ function loadEdits() {
       }
     });
     return parsed;
-  } catch {
+  } catch (err) {
+    console.warn('Failed to load edits:', err);
     return {};
   }
 }
@@ -52,6 +65,31 @@ function applyEdits(edits) {
     }
   });
 }
+
+// Setup real-time listener for edits
+function setupRealtimeEdits() {
+  supabase
+    .channel('edits-channel')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'edits' },
+      (payload) => {
+        console.log('Edit received:', payload);
+        // Reload and reapply edits when changes happen
+        loadEdits().then((edits) => {
+          applyEdits(edits);
+        });
+      }
+    )
+    .subscribe();
+}
+
+// Initialize on page load
+(async () => {
+  const edits = await loadEdits();
+  applyEdits(edits);
+  setupRealtimeEdits();
+})();
 
 function formatTime(date) {
   return new Intl.DateTimeFormat('zh-TW', {

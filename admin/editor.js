@@ -1,3 +1,8 @@
+// Supabase 配置
+const SUPABASE_URL = 'https://ohxfigyfndsbdrdaobjr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_thOWpBPmw188fTMFLkmD7g_HogvWmaN';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const STORAGE_KEY = 'verdo-editor-edits';
 const THEME_STORAGE_KEY = 'verdo-theme';
 const themeToggleButtons = document.querySelectorAll('[data-theme-toggle]');
@@ -15,11 +20,20 @@ function stripTags(input) {
   return tmp.textContent || tmp.innerText || '';
 }
 
-function loadEdits() {
+async function loadEdits() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : {};
-  } catch {
+    const { data, error } = await supabase.from('edits').select('*');
+    if (error) {
+      console.warn('Supabase load error:', error);
+      return {};
+    }
+    const edits = {};
+    data.forEach((row) => {
+      edits[row.key] = row.value;
+    });
+    return edits;
+  } catch (err) {
+    console.warn('Failed to load edits:', err);
     return {};
   }
 }
@@ -41,13 +55,29 @@ function collectEdits() {
   return edits;
 }
 
-function persistEdits() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(collectEdits()));
+async function persistEdits() {
+  const edits = collectEdits();
+  try {
+    for (const [key, value] of Object.entries(edits)) {
+      await supabase.from('edits').upsert(
+        { key, value },
+        { onConflict: 'key' }
+      );
+    }
+    console.log('Edits saved to Supabase');
+  } catch (err) {
+    console.error('Failed to save edits:', err);
+  }
 }
 
-function resetEdits() {
-  localStorage.removeItem(STORAGE_KEY);
-  applyEdits(defaults);
+async function resetEdits() {
+  try {
+    await supabase.from('edits').delete().gte('id', 0);
+    applyEdits(defaults);
+    console.log('Edits reset');
+  } catch (err) {
+    console.error('Failed to reset edits:', err);
+  }
 }
 
 function getPreferredTheme() {
@@ -92,7 +122,12 @@ function updateClock() {
   }
 }
 
-applyEdits(loadEdits());
+// Initialize on page load
+(async () => {
+  const edits = await loadEdits();
+  applyEdits(edits);
+})();
+
 applyTheme(getPreferredTheme());
 updateClock();
 setInterval(updateClock, 30000);
@@ -119,8 +154,8 @@ document.querySelectorAll('[contenteditable="true"]').forEach((element) => {
     document.execCommand('insertText', false, text);
   });
 
-  element.addEventListener('blur', persistEdits);
+  element.addEventListener('blur', () => persistEdits());
 });
 
-document.getElementById('editorSave').addEventListener('click', persistEdits);
-document.getElementById('editorReset').addEventListener('click', resetEdits);
+document.getElementById('editorSave').addEventListener('click', () => persistEdits());
+document.getElementById('editorReset').addEventListener('click', () => resetEdits());
